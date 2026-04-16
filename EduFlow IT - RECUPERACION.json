@@ -1,0 +1,483 @@
+{
+  "name": "EduFlow IT - RECUPERACION",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "message",
+        "subject": "Error en EduFlow IT",
+        "message": "=Se ha detectado un error en el flujo EduFlow IT.\n\nMensaje:\n{{$json[\"execution\"][\"error\"][\"message\"]}}\n\nNodo donde ocurrió:\n{{$json[\"execution\"][\"lastNodeExecuted\"]}}\n\nFecha:\n{{$now}}\n\nRevisar inmediatamente.",
+        "toList": [
+          "douglas.lopez.publicos868@clases.edu.sv"
+        ],
+        "additionalFields": {}
+      },
+      "id": "a7971a40-cccc-42ef-9648-c52a2243fee5",
+      "name": "Gmail Error",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        352
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Ci30l6UBZvRvec6Q",
+          "name": "Gmail account 188"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "subject": "Felicidades",
+        "message": "=Hola ,{{ $json['NOMBRE DE ALUMNO, ALUMNA'] }} aprobaste con {{$json['PF']}}",
+        "toList": [
+          "={{ $json.email }}"
+        ],
+        "additionalFields": {}
+      },
+      "id": "ae6f0056-2143-4bf7-8653-356ee078c42d",
+      "name": "Gmail Aprobado",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        160
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Ci30l6UBZvRvec6Q",
+          "name": "Gmail account 188"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "subject": "Examen de Recuperación",
+        "message": "=Hola {{ $('Get row(s) in sheet').item.json['NOMBRE DE ALUMNO, ALUMNA'] }}, debes completar el examen: https://forms.gle/TU_LINK ",
+        "toList": [
+          "={{ $json.email }}"
+        ],
+        "additionalFields": {}
+      },
+      "id": "06311225-8454-4de7-8939-33a72b63e69e",
+      "name": "Gmail Recuperación",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -48
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Ci30l6UBZvRvec6Q",
+          "name": "Gmail account 188"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "{{$json[\"Estado\"]}} != \"Pendiente\"",
+              "value2": "Enviado"
+            }
+          ]
+        }
+      },
+      "id": "3d6af3b9-bb54-4d1e-907f-f13b39c11f88",
+      "name": "IF No Enviado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        -48
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "0848aca0-f553-41d5-9cab-439a255cc4a2",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1328,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1qO077AGRW0HfMub0me0gLlu5G9C1yytAkNavJ5-pDfg/edit?gid=30845022#gid=30845022",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 30845022,
+          "mode": "list",
+          "cachedResultName": "notas 1ero infra",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qO077AGRW0HfMub0me0gLlu5G9C1yytAkNavJ5-pDfg/edit#gid=30845022"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1120,
+        64
+      ],
+      "id": "a363feb4-2c37-4548-acda-ea37baf51887",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "duBTYGIzFJZkL9pO",
+          "name": "Google Sheets account 81"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4a15f1c9-268f-4f59-b93c-afe04bf34bcf",
+              "leftValue": "={{ $json.PF }}",
+              "rightValue": 4,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -784,
+        64
+      ],
+      "id": "5e54fc60-2bff-4a64-9a25-20b3b8b67fca",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "email",
+              "value": "={{ $('Get row(s) in sheet').item.json.email.replace(/\\n/g,'').trim() }}"
+            },
+            {
+              "name": "Estado",
+              "value": "Enviado"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "a8d3f844-c2be-4b9b-a046-ecea7c8d8821",
+      "name": "Set Estado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        48,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "dataToSave": {
+          "values": [
+            {
+              "value": "={\n  \"email_base\": \"={{ $json.email }}\",\n  \"nombre_base\": \"={{ $json['NOMBRE DE ALUMNO, ALUMNA'] }}\",\n  \"Estado_base\": \"={{ $json.Estado }}\",\n  \"Pf_base\": \"={{ $json.PF }}\"\n}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executionData",
+      "typeVersion": 1.1,
+      "position": [
+        -960,
+        64
+      ],
+      "id": "dfc4dcd7-d378-4c45-b393-43ff9317789e",
+      "name": "Execution Data"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1qO077AGRW0HfMub0me0gLlu5G9C1yytAkNavJ5-pDfg/edit?gid=30845022#gid=30845022",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "notas 1ero infra",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "Estado": "Pendiente"
+          },
+          "matchingColumns": [
+            "Estado"
+          ],
+          "schema": [
+            {
+              "id": "NOMBRE DE ALUMNO, ALUMNA",
+              "displayName": "NOMBRE DE ALUMNO, ALUMNA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "PF",
+              "displayName": "PF",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d4dbc6df-5f16-4a14-8aa1-69565957c734",
+      "name": "Actualizar Estado (MODERNO)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        96,
+        192
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "o3JEkwFGdvNfBdkJ",
+          "name": "Google Sheets account 231"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ca34d508-e559-4fc7-bb34-02d434c4df5e",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        48
+      ],
+      "id": "5060e8ab-b3cb-4cfe-ab0a-8ecac84594c9",
+      "name": "If1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Recuperación": {
+      "main": [
+        [
+          {
+            "node": "Set Estado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF No Enviado": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Gmail Recuperación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Execution Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "IF No Enviado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail Aprobado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Error": {
+      "main": [
+        []
+      ]
+    },
+    "Set Estado": {
+      "main": [
+        [
+          {
+            "node": "Actualizar Estado (MODERNO)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execution Data": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Gmail Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Aprobado": {
+      "main": [
+        [],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "f77dc198-92d0-4f45-b238-cecfa9ab8214",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "470de8576529a9644f4a8141df49435772709f5596f4857efd7cc0dd109b53c5"
+  },
+  "id": "fCvbMuHF_wk_YugC4D_Ed",
+  "tags": []
+}
